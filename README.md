@@ -4,7 +4,7 @@ A professional, privacy-first **Single Page Application (SPA)** and **Progressiv
 
 Featuring real-time currency conversion, bi-directional asset-to-debt mapping, live visual liability ratios, multi-language support (English & Bangla), and direct PDF export capabilities.
 
-🚀 **Live Preview:** [https://SAHimu369.github.io](https://SAHimu369.github.io) *(Configure repository GitHub Pages)*
+🚀 **Live Preview:** [https://SAHimu369.github.io](https://SAHimu369.github.io/zakat-statement) *(Configure repository GitHub Pages)*
 
 ---
 
