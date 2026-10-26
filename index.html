@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Zakat & Fitra Statement</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #0B0F17;
+            --card-bg: #111827;
+            --card-border: #1F2937;
+            --gold-primary: #D97706;
+            --gold-light: rgba(217, 119, 6, 0.12);
+            --text-main: #F9FAFB;
+            --text-muted: #9CA3AF;
+            --input-bg: #030712;
+            --input-border: #374151;
+            --radius-md: 8px;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 0.5rem;
+        }
+
+        .receipt-wrapper {
+            background: var(--card-bg);
+            max-width: 800px;
+            width: 100%;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .receipt-wrapper::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #D97706, #F59E0B, #D97706);
+        }
+
+        .receipt-body { padding: 2.5rem; }
+
+        .receipt-header {
+            text-align: center;
+            border-bottom: 2px dashed var(--input-border);
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .brand-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .brand-logo span { color: var(--gold-primary); }
+
+        .receipt-meta {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--input-bg);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--card-border);
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .currency-selectors { 
+            display: flex; 
+            gap: 0.5rem; 
+            flex-wrap: wrap; 
+            align-items: center;
+        }
+
+        .selector-group {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+        }
+
+        .selector-group select, .rate-input {
+            background: var(--card-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            padding: 0.35rem 0.5rem;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .rate-input { width: 75px; text-align: center; color: var(--gold-primary); }
+
+        .action-btns { display: flex; gap: 0.5rem; }
+
+        .btn {
+            background: transparent;
+            border: 1px solid var(--input-border);
+            color: var(--text-main);
+            padding: 0.4rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn:hover { background: var(--gold-light); border-color: var(--gold-primary); color: var(--gold-primary); }
+
+        .receipt-section-title {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gold-primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 1.5rem;
+        }
+
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 320px;
+        }
+
+        .receipt-table th {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            text-align: left;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--card-border);
+            white-space: nowrap;
+        }
+
+        .receipt-table td {
+            padding: 0.6rem 0;
+            border-bottom: 1px dotted var(--card-border);
+        }
+
+        .receipt-table tr:last-child td { border-bottom: none; }
+
+        .receipt-table td.amount {
+            text-align: right;
+            font-family: var(--font-mono);
+            font-weight: 500;
+        }
+
+        .receipt-table input {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            padding: 0.35rem 0.5rem;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 110px;
+            text-align: right;
+        }
+
+        .receipt-table input:focus { border-color: var(--gold-primary); outline: none; }
+
+        .summary-box {
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.4rem 0;
+            font-size: 0.85rem;
+            gap: 0.5rem;
+        }
+
+        .summary-row.total {
+            border-top: 2px dashed var(--input-border);
+            margin-top: 0.5rem;
+            padding-top: 0.75rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .summary-row .val {
+            font-family: var(--font-mono);
+            text-align: right;
+        }
+
+        .summary-row.total .val {
+            color: var(--gold-primary);
+            font-size: 1.25rem;
+        }
+
+        .receipt-footer {
+            text-align: center;
+            border-top: 2px dashed var(--input-border);
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* Mobile Breakpoints */
+        @media (max-width: 640px) {
+            body { padding: 0.5rem 0.25rem; }
+            .receipt-body { padding: 1.25rem 1rem; }
+            .brand-logo { font-size: 1.25rem; }
+            
+            .controls-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.75rem;
+            }
+
+            .currency-selectors {
+                justify-content: space-between;
+                width: 100%;
+            }
+
+            .action-btns { width: 100%; }
+
+            .action-btns .btn {
+                flex: 1;
+                text-align: center;
+                padding: 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            .receipt-meta {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.25rem;
+            }
+
+            .receipt-table input {
+                max-width: 85px;
+                padding: 0.4rem 0.3rem;
+            }
+
+            .summary-row { font-size: 0.8rem; }
+            .summary-row.total { font-size: 0.95rem; }
+            .summary-row.total .val { font-size: 1.1rem; }
+        }
+
+        @media print {
+            body {
+                background-color: #FFFFFF !important;
+                color: #000000 !important;
+                display: block;
+                padding: 0;
+            }
+            .receipt-wrapper {
+                border: none;
+                box-shadow: none;
+                max-width: 100%;
+                background: #FFFFFF !important;
+                color: #000000 !important;
+            }
+            .receipt-wrapper::before { display: none; }
+            .controls-bar, .action-btns { display: none !important; }
+            .receipt-table input, .rate-input {
+                border: none;
+                background: transparent !important;
+                color: #000000 !important;
+                padding: 0;
+                text-align: right;
+            }
+            .summary-box {
+                background: #F9FAFB !important;
+                border: 1px solid #D1D5DB !important;
+            }
+            .receipt-header, .receipt-footer {
+                border-color: #9CA3AF !important;
+                color: #374151 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="receipt-wrapper" id="receipt-document">
+        <div class="receipt-body">
+            
+            <div class="receipt-header">
+                <div class="brand-logo"><span>ZAKAT</span> STATEMENT</div>
+                <div class="receipt-meta">
+                    <span id="receipt-date">DATE: --/--/----</span>
+                    <span id="receipt-id">REF: #ZKT-00000</span>
+                </div>
+            </div>
+
+            <div class="controls-bar" data-html2canvas-ignore="true">
+                <div class="currency-selectors">
+                    <div class="selector-group">
+                        <label for="lang-select">LANG</label>
+                        <select id="lang-select" class="save-state">
+                            <option value="en" selected>English</option>
+                            <option value="bn">বাংলা</option>
+                        </select>
+                    </div>
+                    <div class="selector-group">
+                        <label for="local-currency">LOCAL</label>
+                        <select id="local-currency" class="save-state">
+                            <option value="BDT" selected>BDT</option>
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="GBP">GBP</option>
+                        </select>
+                    </div>
+                    <div class="selector-group">
+                        <label for="foreignToLocalRate">RATE</label>
+                        <input type="number" id="foreignToLocalRate" class="rate-input save-state" step="0.01" value="21.50" aria-label="Exchange Rate" />
+                    </div>
+                    <div class="selector-group">
+                        <label for="foreign-currency">FOREIGN</label>
+                        <select id="foreign-currency" class="save-state">
+                            <option value="SAR" selected>SAR</option>
+                            <option value="USD">USD</option>
+                            <option value="AED">AED</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="action-btns">
+                    <button type="button" class="btn" id="exportPdfBtn">📄 SAVE PDF</button>
+                    <button type="button" class="btn" id="clearDataBtn">🗑 RESET</button>
+                </div>
+            </div>
+
+            <form id="calculator-form" autocomplete="off" onsubmit="return false;">
+                <!-- ZAKAT SECTION -->
+                <div class="receipt-section-title">
+                    <span>01. Zakat Assets</span>
+                    <span id="nisab-indicator" style="font-size: 0.65rem; color: var(--text-muted);">NISAB: 4862.14 SAR</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="receipt-table">
+                        <thead>
+                            <tr>
+                                <th>ASSET CLASS</th>
+                                <th style="text-align:right;" id="th-local">LOCAL (BDT)</th>
+                                <th style="text-align:right;" id="th-foreign">FOREIGN (SAR)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Gold / Silver</td>
+                                <td class="amount"><input type="number" id="gold-local" class="zakat-local save-state" data-target="precious" placeholder="0.00" step="any"></td>
+                                <td class="amount"><input type="number" id="gold-foreign" class="zakat-foreign save-state" data-target="precious" placeholder="0.00" step="any"></td>
+                            </tr>
+                            <tr>
+                                <td>Cash &amp; Bank</td>
+                                <td class="amount"><input type="number" id="cash-local" class="zakat-local save-state" data-target="cash" placeholder="0.00" step="any"></td>
+                                <td class="amount"><input type="number" id="cash-foreign" class="zakat-foreign save-state" data-target="cash" placeholder="0.00" step="any"></td>
+                            </tr>
+                            <tr>
+                                <td>Investments / Stocks</td>
+                                <td class="amount"><input type="number" id="invest-local" class="zakat-local save-state" data-target="investments" placeholder="0.00" step="any"></td>
+                                <td class="amount"><input type="number" id="invest-foreign" class="zakat-foreign save-state" data-target="investments" placeholder="0.00" step="any"></td>
+                            </tr>
+                            <tr>
+                                <td style="color:#EF4444;">Deductions / Debts (-)</td>
+                                <td class="amount"><input type="number" id="debts-local" class="zakat-local save-state" data-target="debts" placeholder="0.00" step="any"></td>
+                                <td class="amount"><input type="number" id="debts-foreign" class="zakat-foreign save-state" data-target="debts" placeholder="0.00" step="any"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- FITRA SECTION -->
+                <div class="receipt-section-title">
+                    <span>02. Fitra Allocation</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="receipt-table">
+                        <thead>
+                            <tr>
+                                <th>ITEM</th>
+                                <th style="text-align:right;">QTY</th>
+                                <th style="text-align:right;">RATE / HEAD</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Dependents / Family</td>
+                                <td class="amount"><input type="number" id="fitra-people" class="save-state" value="1" min="0" style="width:60px;"></td>
+                                <td class="amount"><input type="number" id="fitra-rate-local" class="save-state" value="120.00" step="any"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- VISUAL RATIO BAR -->
+                <div style="margin-top: 1.5rem; margin-bottom: 0.5rem;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.7rem; font-family:var(--font-mono); color:var(--text-muted); margin-bottom:0.25rem;">
+                        <span>ASSETS VS DEBTS RATIO</span>
+                        <span id="ratio-text">0% Liabilities</span>
+                    </div>
+                    <div style="width:100%; height:6px; background:var(--input-bg); border-radius:4px; overflow:hidden; border:1px solid var(--input-border);">
+                        <div id="ratio-bar" style="width:0%; height:100%; background:var(--gold-primary); transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+
+                <!-- SUMMARY / TOTALS -->
+                <div class="summary-box">
+                    <div class="summary-row">
+                        <span>Net Assessable Wealth</span>
+                        <span class="val" id="net-wealth-val">0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Zakat Liability (2.5%)</span>
+                        <span class="val" id="zakat-due-val">0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Fitra Liability</span>
+                        <span class="val" id="fitra-due-val">0.00</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>TOTAL DUE</span>
+                        <span class="val" id="grand-total-val">0.00</span>
+                    </div>
+                    <div style="text-align:right; font-family:var(--font-mono); font-size:0.75rem; color:var(--gold-primary); margin-top:0.25rem;" id="grand-total-alt">
+                        FOREIGN: 0.00
+                    </div>
+                </div>
+            </form>
+
+            <div class="receipt-footer">
+                <div>*** OFFICIAL COMPUTATION STATEMENT ***</div>
+                <div style="margin-top:0.25rem;">May your wealth be purified and accepted.</div>
+            </div>
+
+        </div>
+    </div>
+
+<script>
+    const STORAGE_KEY = 'zakat_receipt_state_v3';
+
+    // Set Receipt Meta
+    document.getElementById('receipt-date').innerText = `DATE: ${new Date().toISOString().slice(0,10)}`;
+    document.getElementById('receipt-id').innerText = `REF: #ZKT-${Math.floor(10000 + Math.random() * 90000)}`;
+
+    const rateInput = document.getElementById('foreignToLocalRate');
+    const localCurrSelect = document.getElementById('local-currency');
+    const foreignCurrSelect = document.getElementById('foreign-currency');
+    const langSelect = document.getElementById('lang-select');
+
+    const translations = {
+        en: {
+            brandTitle: "ZAKAT STATEMENT",
+            section1: "01. Zakat Assets",
+            section2: "02. Fitra Allocation",
+            assetClass: "ASSET CLASS",
+            goldSilver: "Gold / Silver",
+            cashBank: "Cash & Bank",
+            investments: "Investments / Stocks",
+            debts: "Deductions / Debts (-)",
+            item: "ITEM",
+            qty: "QTY",
+            rateHead: "RATE / HEAD",
+            dependents: "Dependents / Family",
+            netWealth: "Net Assessable Wealth",
+            zakatLiability: "Zakat Liability (2.5%)",
+            fitraLiability: "Fitra Liability",
+            totalDue: "TOTAL DUE",
+            footerText: "*** OFFICIAL COMPUTATION STATEMENT ***",
+            footerSub: "May your wealth be purified and accepted."
+        },
+        bn: {
+            brandTitle: "যাকাত ও ফিতরা বিবরণী",
+            section1: "০১. যাকাতের সম্পদসমূহ",
+            section2: "০২. ফিতরা নির্ধারণ",
+            assetClass: "সম্পদের খাত",
+            goldSilver: "স্বর্ণ / রূপা",
+            cashBank: "নগদ ও ব্যাংক জমা",
+            investments: "বিনিয়োগ / শেয়ার",
+            debts: "দায় / ঋণ (-)",
+            item: "খাত",
+            qty: "পরিমাণ",
+            rateHead: "হার / জন প্রতি",
+            dependents: "পরিবারের সদস্যবৃন্দ",
+            netWealth: "নিট করযোগ্য সম্পদ",
+            zakatLiability: "যাকাত ওয়াজিব (২.৫%)",
+            fitraLiability: "ফিতরা বাবদ মোট",
+            totalDue: "সর্বমোট প্রদেয়",
+            footerText: "*** সরকারি হিসাব বিবরণী ***",
+            footerSub: "আপনার সম্পদ পবিত্র ও কবুল হোক।"
+        }
+    };
+
+    function getRate() { return parseFloat(rateInput.value) || 1; }
+
+    function updateLabelsAndHeaders() {
+        const local = localCurrSelect.value;
+        const foreign = foreignCurrSelect.value;
+        document.getElementById('th-local').innerText = `LOCAL (${local})`;
+        document.getElementById('th-foreign').innerText = `FOREIGN (${foreign})`;
+        calculate();
+    }
+
+    function changeLanguage() {
+        const lang = langSelect.value;
+        const t = translations[lang] || translations.en;
+
+        document.querySelector('.brand-logo').innerHTML = `<span>${t.brandTitle.split(' ')[0]}</span> ${t.brandTitle.split(' ').slice(1).join(' ')}`;
+        document.querySelectorAll('.receipt-section-title')[0].querySelector('span').innerText = t.section1;
+        document.querySelectorAll('.receipt-section-title')[1].querySelector('span').innerText = t.section2;
+        
+        document.querySelectorAll('.receipt-table th')[0].innerText = t.assetClass;
+        
+        const rows1 = document.querySelectorAll('.receipt-table tbody tr');
+        if(rows1.length >= 4) {
+            rows1[0].cells[0].innerText = t.goldSilver;
+            rows1[1].cells[0].innerText = t.cashBank;
+            rows1[2].cells[0].innerText = t.investments;
+            rows1[3].cells[0].innerText = t.debts;
+        }
+
+        const table2Th = document.querySelectorAll('.receipt-table')[1].querySelectorAll('th');
+        table2Th[0].innerText = t.item;
+        table2Th[1].innerText = t.qty;
+        table2Th[2].innerText = t.rateHead;
+        document.querySelectorAll('.receipt-table')[1].querySelector('tbody tr td').innerText = t.dependents;
+
+        const summaryRows = document.querySelectorAll('.summary-row span:first-child');
+        summaryRows[0].innerText = t.netWealth;
+        summaryRows[1].innerText = t.zakatLiability;
+        summaryRows[2].innerText = t.fitraLiability;
+        summaryRows[3].innerText = t.totalDue;
+
+        document.querySelectorAll('.receipt-footer div')[0].innerText = t.footerText;
+        document.querySelectorAll('.receipt-footer div')[1].innerText = t.footerSub;
+    }
+
+    // Input Converters
+    document.querySelectorAll('.zakat-local').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const target = e.target.getAttribute('data-target');
+            const foreignInput = document.querySelector(`.zakat-foreign[data-target="${target}"]`);
+            if (foreignInput) {
+                const val = parseFloat(e.target.value);
+                foreignInput.value = isNaN(val) ? '' : (val / getRate()).toFixed(2);
+            }
+            calculate();
+            saveState();
+        });
+    });
+
+    document.querySelectorAll('.zakat-foreign').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const target = e.target.getAttribute('data-target');
+            const localInput = document.querySelector(`.zakat-local[data-target="${target}"]`);
+            if (localInput) {
+                const val = parseFloat(e.target.value);
+                localInput.value = isNaN(val) ? '' : (val * getRate()).toFixed(2);
+            }
+            calculate();
+            saveState();
+        });
+    });
+
+    document.getElementById('fitra-people').addEventListener('input', () => { calculate(); saveState(); });
+    document.getElementById('fitra-rate-local').addEventListener('input', () => { calculate(); saveState(); });
+    rateInput.addEventListener('input', () => { updateLabelsAndHeaders(); saveState(); });
+    localCurrSelect.addEventListener('change', () => { updateLabelsAndHeaders(); saveState(); });
+    foreignCurrSelect.addEventListener('change', () => { updateLabelsAndHeaders(); saveState(); });
+    langSelect.addEventListener('change', () => { changeLanguage(); saveState(); });
+
+    function calculate() {
+        let assets = 0;
+        let debts = 0;
+
+        document.querySelectorAll('.zakat-local').forEach(input => {
+            const val = parseFloat(input.value) || 0;
+            if (input.getAttribute('data-target') === 'debts') debts += val;
+            else assets += val;
+        });
+
+        // Visual Ratio Bar Update
+        const totalRawAssets = assets;
+        const debtPercentage = totalRawAssets > 0 ? Math.min(100, Math.round((debts / totalRawAssets) * 100)) : 0;
+        document.getElementById('ratio-bar').style.width = `${debtPercentage}%`;
+        document.getElementById('ratio-text').innerText = `${debtPercentage}% Liabilities of Gross Assets`;
+
+        const netWealth = Math.max(0, assets - debts);
+        const zakatDue = netWealth * 0.025;
+
+        const people = parseInt(document.getElementById('fitra-people').value) || 0;
+        const fitraRate = parseFloat(document.getElementById('fitra-rate-local').value) || 0;
+        const fitraDue = people * fitraRate;
+
+        const totalDue = zakatDue + fitraDue;
+        const rate = getRate();
+        const localSym = localCurrSelect.value;
+        const foreignSym = foreignCurrSelect.value;
+
+        document.getElementById('net-wealth-val').innerText = `${localSym} ${netWealth.toFixed(2)}`;
+        document.getElementById('zakat-due-val').innerText = `${localSym} ${zakatDue.toFixed(2)}`;
+        document.getElementById('fitra-due-val').innerText = `${localSym} ${fitraDue.toFixed(2)}`;
+        document.getElementById('grand-total-val').innerText = `${localSym} ${totalDue.toFixed(2)}`;
+        document.getElementById('grand-total-alt').innerText = `${foreignSym}: ${(totalDue / rate).toFixed(2)}`;
+    }
+
+    function saveState() {
+        const data = {};
+        document.querySelectorAll('.save-state').forEach(el => {
+            if (el.id) data[el.id] = el.value;
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadState() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        try {
+            const data = JSON.parse(raw);
+            Object.keys(data).forEach(key => {
+                const el = document.getElementById(key);
+                if (el) el.value = data[key];
+            });
+            updateLabelsAndHeaders();
+            changeLanguage();
+        } catch (e) { console.error(e); }
+    }
+
+    document.getElementById('clearDataBtn').addEventListener('click', () => {
+        if (confirm('Reset receipt data?')) {
+            localStorage.removeItem(STORAGE_KEY);
+            location.reload();
+        }
+    });
+
+    document.getElementById('exportPdfBtn').addEventListener('click', () => {
+        document.querySelectorAll('input, select').forEach(el => el.setAttribute('value', el.value));
+
+        const element = document.getElementById('receipt-document');
+        const opt = {
+            margin:       0.2,
+            filename:     `Zakat_Statement_${document.getElementById('receipt-id').innerText.replace(/[^a-zA-Z0-9]/g, '')}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, backgroundColor: '#111827', useCORS: true },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    });
+
+    loadState();
+</script>
+</body>
+</html>
